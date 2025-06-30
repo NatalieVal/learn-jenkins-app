@@ -41,10 +41,10 @@ pipeline {
                 //junit 'test-results/junit.xml'
             }
         }
-        post{
+    }
+    post{
             always {
                 junit 'test-results/junit.xml'
             }
-        }
     }
 }
