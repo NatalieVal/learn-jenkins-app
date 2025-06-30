@@ -35,7 +35,10 @@ pipeline {
                 echo "Testing the build"
                 test -f build/$BUILD_FILE_NAME
                 npm test
+                mkdir -p test-results
+                npm test -- --ci --passWithNoTests || true
                 '''
+                junit 'test-results/junit.xml'
             }
         }
 
