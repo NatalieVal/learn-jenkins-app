@@ -37,12 +37,12 @@
     ]
   },
   "devDependencies": {
-    "@playwright/test": "^1.53.0",
+    "@playwright/test": "^1.53.1",
     "@types/node": "^20.8.6"
   },
   "jest-junit": {
     "suiteName": "jest tests",
-    "outputDirectory": "test-results",
+    "outputDirectory": "jest-results",
     "outputName": "junit.xml",
     "uniqueOutputName": "false",
     "classNameTemplate": "{classname}-{title}",
