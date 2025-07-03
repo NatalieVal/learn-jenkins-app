@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         NETLIFY_PROJECT_ID = 'b7ffc4ae-f146-4014-bf6c-adc8da541a4f'
-        //NETLIFY_AUTH_TOKEN = credentials('netlify-token') //exact id from jenkins credentials
+        NETLIFY_AUTH_TOKEN = credentials('netlify-token') //exact id from jenkins credentials
     }
     //here the stages start
     stages {
