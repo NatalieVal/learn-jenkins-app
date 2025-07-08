@@ -27,35 +27,34 @@ pipeline {
             }
         }
         
-        stage('Run Tests'){
+        stage('Tests'){
             parallel{
                 stage('Unit Test') {
                     agent {
-                            docker {
-                                image 'node:18-alpine'
-                                reuseNode true
-                            }
+                        docker {
+                            image 'node:18-alpine'
+                            reuseNode true
                         }
-
+                    }
                     steps {
-                            sh '''
-                                test -f build/index.html
-                                npm test
-                            '''
-                         }
-                         post {
-                            always {
-                                junit 'jest-results/junit.xml'
-                            }
+                        sh '''
+                            test -f build/index.html
+                            npm test
+                        '''
+                    }
+                    post {
+                        always {
+                            junit 'jest-results/junit.xml'
                         }
+                    }
                 }
                 stage('E2E Test') {
                     agent {
-                            docker {
-                                    image 'mcr.microsoft.com/playwright:v1.53.1-jammy'
-                                    reuseNode true
-                                    }
-                                }
+                        docker {
+                            image 'mcr.microsoft.com/playwright:v1.53.1-jammy'
+                            reuseNode true
+                        }
+                    }
 
                     steps {
                             sh '''
@@ -67,7 +66,7 @@ pipeline {
                             }
                     post {
                         always {
-                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright HTML Report', reportTitles: '', useWrapperFileDirectly: true])
+                            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright Local', reportTitles: '', useWrapperFileDirectly: true])
                         }
                     }
                 }
@@ -75,19 +74,40 @@ pipeline {
         }
         stage('Deploy') {
             agent {
-                    docker {
-                        image 'node:18-alpine'
-                        reuseNode true
-                    }
+                docker {
+                    image 'node:18-alpine'
+                    reuseNode true
                 }
+            }
             steps {
-                    sh '''
-                        npm install netlify-cli@20.1.1
-                        node_modules/.bin/netlify --version
-                        echo "Deploying to production. Project ID: $NETLIFY_SITE_ID"
-                        node_modules/.bin/netlify status
-                        node_modules/.bin/netlify deploy --dir=build --prod 
-                    '''
+                sh '''
+                    npm install netlify-cli@20.1.1
+                    node_modules/.bin/netlify --version
+                    echo "Deploying to production. Project ID: $NETLIFY_SITE_ID"
+                    node_modules/.bin/netlify status
+                    node_modules/.bin/netlify deploy --dir=build --prod 
+                '''
+            }
+        }
+        stage('Prod E2E Test') {
+            agent {
+                docker {
+                        image 'mcr.microsoft.com/playwright:v1.53.1-jammy'
+                        reuseNode true
+                        }
+                    }
+            environment {
+                CI_ENVIRONMENT_URL = 'https://wondrous-heliotrope-585c4a.netlify.app'
+            }
+            steps {
+                sh '''
+                    npx playwright test --reporter=html
+                '''
+            }
+            post {
+                always {
+                    publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright E2E', reportTitles: '', useWrapperFileDirectly: true])
+                }
             }
         }
 
