@@ -75,9 +75,12 @@ pipeline {
         stage('Deploy Staging') {
             agent {
                 docker {
-                    image 'node:18-alpine'
-                    reuseNode true
-                }
+                        image 'mcr.microsoft.com/playwright:v1.53.1-jammy'
+                        reuseNode true
+                        }
+                    }
+            environment {
+                CI_ENVIRONMENT_URL = "STAGING_URL_TO_BE_SET_BY_SCRIPT"
             }
             steps {
                 sh '''
@@ -86,24 +89,7 @@ pipeline {
                     echo "Deploying to production. Project ID: $NETLIFY_SITE_ID"
                     node_modules/.bin/netlify status
                     node_modules/.bin/netlify deploy --dir=build 
-                '''
-                script {
-                env.STAGING_URL = sh(script: 'node_modules/.bin/node-jq -r ".deploy_url" deploy-output.json', returnStdout:true)
-                }
-            }
-        }
-        stage('Staging E2E Test') {
-            agent {
-                docker {
-                        image 'mcr.microsoft.com/playwright:v1.53.1-jammy'
-                        reuseNode true
-                        }
-                    }
-            environment {
-                CI_ENVIRONMENT_URL = "${env.STAGING_URL}"
-            }
-            steps {
-                sh '''
+                    CI_ENVIRONMENT_URL=$(node_modules/.bin/node-jq -r ".deploy_url" deploy-output.json)
                     npx playwright test --reporter=html
                 '''
             }
