@@ -86,23 +86,17 @@ pipeline {
                 sh '''
                     npm install netlify-cli@20.1.1 node-jq
                     node_modules/.bin/netlify --version
-                    echo "Deploying to production. Project ID: $NETLIFY_SITE_ID"
+                    echo "Deploying to staging. Project ID: $NETLIFY_SITE_ID"
                     node_modules/.bin/netlify status
                     node_modules/.bin/netlify deploy --dir=build 
                     CI_ENVIRONMENT_URL=$(node_modules/.bin/node-jq -r ".deploy_url" deploy-output.json)
+                    echo "CI_ENVIRONMENT_URL"
                     npx playwright test --reporter=html
                 '''
             }
             post {
                 always {
                     publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Staging E2E', reportTitles: '', useWrapperFileDirectly: true])
-                }
-            }
-        }
-        stage('Manual Approval') {
-            steps {
-                timeout(time: 15, unit: 'MINUTES') {
-                    input message: 'Do you wish to deploy to production?', ok: 'Yes, I am sure!'
                 }
             }
         }
