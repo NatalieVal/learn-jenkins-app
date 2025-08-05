@@ -119,6 +119,7 @@ pipeline {
                     echo "Deploying to production. Project ID: $NETLIFY_SITE_ID"
                     node_modules/.bin/netlify status
                     node_modules/.bin/netlify deploy --dir=build --prod
+                    echo $REACT_APP_VERSION
                     npx playwright test --reporter=html
                 '''
             }
