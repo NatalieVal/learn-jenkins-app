@@ -87,8 +87,7 @@ pipeline {
                 }
             }
             steps {
-                sh 
-                '''
+                sh '''
                     netlify --version
                     echo "Deploying to production. Project ID: $NETLIFY_SITE_ID"
                     netlify status
