@@ -13,6 +13,11 @@ pipeline {
                 sh 'docker build -t my-playwright .'
             }
         }
+        stage('Docker'){
+            steps {
+                sh 'docker build -t my-playwright .'
+            }
+        }
         
         stage('Build') {
             agent {
@@ -82,26 +87,7 @@ pipeline {
         stage('Deploy Staging') {
             agent {
                 docker {
-                    image 'my-playwright'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh '''
-                    netlify --version
-                    echo "Deploying to production. Project ID: $NETLIFY_SITE_ID"
-                    netlify status
-                    netlify deploy --dir=build 
-                '''
-                script {
-                env.STAGING_URL = sh(script: 'node-jq -r ".deploy_url" deploy-output.json', returnStdout:true)
-                }
-            }
-        }
-        stage('Staging E2E Test') {
-            agent {
-                docker {
-                        image 'mcr.microsoft.com/playwright:v1.53.1-jammy'
+                        image 'my-playwright'
                         reuseNode true
                         }
                     }
@@ -110,12 +96,11 @@ pipeline {
             }
             steps {
                 sh '''
-                    npm install netlify-cli node-jq
-                    node_modules/.bin/netlify --version
+                    netlify --version
                     echo "Deploying to staging. Site ID: $NETLIFY_SITE_ID"
-                    node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --dir=build --json > deploy-output.json
-                    CI_ENVIRONMENT_URL=$(node_modules/.bin/node-jq -r '.deploy_url' deploy-output.json)
+                    netlify status
+                    netlify deploy --dir=build --json > deploy-output.json
+                    CI_ENVIRONMENT_URL=$(node-jq -r '.deploy_url' deploy-output.json)
                     echo $REACT_APP_VERSION
                     npx playwright test  --reporter=html
                 '''
@@ -129,23 +114,7 @@ pipeline {
         stage('Deploy Prod') {
             agent {
                 docker {
-                    image 'my-playwright'
-                    reuseNode true
-                }
-            }
-            steps {
-                sh '''
-                    netlify --version
-                    echo "Deploying to production. Project ID: $NETLIFY_SITE_ID"
-                    netlify status
-                    netlify deploy --dir=build --prod 
-                '''
-            }
-        }
-        stage('Prod E2E Test') {
-            agent {
-                docker {
-                        image 'mcr.microsoft.com/playwright:v1.53.1-jammy'
+                        image 'my-playwright'
                         reuseNode true
                         }
                     }
@@ -155,11 +124,10 @@ pipeline {
             steps {
                 sh '''
                     node --version
-                    npm install netlify-cli@20.1.1
-                    node_modules/.bin/netlify --version
+                    netlify --version
                     echo "Deploying to production. Project ID: $NETLIFY_SITE_ID"
-                    node_modules/.bin/netlify status
-                    node_modules/.bin/netlify deploy --dir=build --prod
+                    netlify status
+                    netlify deploy --dir=build --prod
                     echo $REACT_APP_VERSION
                     npx playwright test --reporter=html
                 '''
