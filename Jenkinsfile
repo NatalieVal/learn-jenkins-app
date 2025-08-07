@@ -7,7 +7,11 @@ pipeline {
     }
     //here the stages start
     stages {
-        
+        stage('Check Node') {
+            steps {
+                sh 'echo "Running on Jenkins node: $NODE_NAME"'
+            }
+        }
         stage('Build') {
             agent {
                 docker {
