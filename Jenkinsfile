@@ -7,9 +7,17 @@ pipeline {
     }
     //here the stages start
     stages {
-        stage('Check Node') {
+        stage('AWS') {
+            agent {
+                docker {
+                    image 'amazon/aws-cli'
+                    args "--entrypoint=''"
+                }
+            }
             steps {
-                sh 'echo "Running on Jenkins node: $NODE_NAME"'
+                sh '''
+                    aws --version
+                '''
             }
         }
         stage('Build') {
