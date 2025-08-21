@@ -29,7 +29,7 @@ pipeline {
         } 
         stage('Build Docker Image'){
             steps {
-                // -t is a tag we're going to use for the custom app
+                // -t is a tag we're going to use for our image
                 sh 'docker build -t myjenkinsapp .'
             }
         }        
