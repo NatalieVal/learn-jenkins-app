@@ -18,7 +18,6 @@ pipeline {
             }
             steps {
                 sh '''
-                    echo "Small change to trigger Jenkins job"
                     ls -la
                     node --version
                     npm --version
